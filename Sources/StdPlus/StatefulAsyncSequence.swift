@@ -23,7 +23,7 @@
 /// ## Multiple iterators
 ///
 /// Each iterator created from this sequence starts with a fresh copy of `initialState`,
-/// so multiple iterations are independent:
+/// so if it implements value semantics, multiple iterations are independent:
 ///
 /// ```swift
 /// for await n in counter { print(n) }  // 1, 2, 3, 4, 5
@@ -46,6 +46,16 @@ public struct StatefulAsyncSequence<State, Element, Failure: Error> {
     _ isolation: isolated (any Actor)?
   ) async throws(Failure) -> sending Element?
 
+  /// A `@Sendable` closure that produces the next element using mutable, `Sendable` state.
+  ///
+  /// - Parameters:
+  ///   - state: Mutable state that persists across iterations.
+  /// - Returns: The next element, or `nil` to end the sequence.
+  public typealias NonisolatedGenerator = @Sendable (
+    _ state: inout State
+  ) async throws(Failure) -> sending Element?
+  where State: Sendable
+
   @usableFromInline
   let initialState: State
 
@@ -55,11 +65,23 @@ public struct StatefulAsyncSequence<State, Element, Failure: Error> {
   /// Creates a stateful async sequence.
   ///
   /// - Parameters:
-  ///   - initialState: The starting state for each iterator.
-  ///   - generator: A closure that produces elements and mutates state.
+  ///   - initialState: The starting state for the iterator.
+  ///   - generator: An async closure that produces elements and mutates state.
   public init(initialState: State, generator: @escaping Generator) {
     self.initialState = initialState
     self.generator = generator
+  }
+
+  /// Creates a stateful async sequence using `Sendable` state.
+  ///
+  /// - Parameters:
+  ///   - initialState: The starting state for the iterator.
+  ///   - generator: A `@Sendable` async closure that produces elements and mutates state.
+  public init(initialState: State, generator: @escaping NonisolatedGenerator)
+  where State: Sendable {
+    self.init(initialState: initialState) { state, _ throws(Failure) in
+      try await generator(&state)
+    }
   }
 }
 

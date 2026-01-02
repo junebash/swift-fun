@@ -148,4 +148,23 @@ struct StatefulAsyncSequenceTests {
 
     #expect(results == ["HELLO", "WORLD", "SWIFT"])
   }
+
+  @Test
+  func nonisolatedGenerator() async throws {
+    let seq = StatefulAsyncSequence(initialState: 0) { state -> Double? in
+      guard !Task.isCancelled else { return nil }
+      defer { state += 1 }
+      await Task.yield()
+      if state < 10 {
+        return Double(state)
+      } else {
+        return nil
+      }
+    }
+    var values = [Double]()
+    for await value in seq {
+      values.append(value)
+    }
+    #expect(values == [0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+  }
 }
