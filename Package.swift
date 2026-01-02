@@ -41,4 +41,5 @@ for target in package.targets {
     .strictMemorySafety(),
     .swiftLanguageMode(.v6),
   ])
+  target.swiftSettings = swiftSettings
 }
