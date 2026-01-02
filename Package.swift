@@ -1,26 +1,44 @@
 // swift-tools-version: 6.2
-// The swift-tools-version declares the minimum version of Swift required to build this package.
 
 import PackageDescription
 
 let package = Package(
-    name: "swift-fun",
-    products: [
-        // Products define the executables and libraries a package produces, making them visible to other packages.
-        .library(
-            name: "swift-fun",
-            targets: ["swift-fun"]
-        ),
-    ],
-    targets: [
-        // Targets are the basic building blocks of a package, defining a module or a test suite.
-        // Targets can depend on other targets in this package and products from dependencies.
-        .target(
-            name: "swift-fun"
-        ),
-        .testTarget(
-            name: "swift-funTests",
-            dependencies: ["swift-fun"]
-        ),
-    ]
+  name: "swift-fun",
+  platforms: [
+    .iOS(.v18),
+    .macOS(.v15),
+    .tvOS(.v18),
+    .macCatalyst(.v18),
+    .watchOS(.v11),
+    .visionOS(.v2),
+  ],
+  products: [],
+  targets: []
 )
+
+@MainActor
+func addProduct(
+  _ name: String,
+  dependencies: [Target.Dependency] = []
+) {
+  package.products.append(.library(name: name, targets: [name]))
+  package.targets.append(
+    contentsOf: [
+      .target(name: name, dependencies: dependencies),
+      .testTarget(name: name + "Tests", dependencies: [.byName(name: name)])
+    ]
+  )
+}
+
+addProduct("Either")
+addProduct("SequenceBuilder", dependencies: ["Either"])
+addProduct("StdPlus")
+
+for target in package.targets {
+  var swiftSettings = target.swiftSettings ?? []
+  swiftSettings.append(contentsOf: [
+    .defaultIsolation(nil),
+    .strictMemorySafety(),
+    .swiftLanguageMode(.v6),
+  ])
+}
