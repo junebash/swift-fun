@@ -1,4 +1,5 @@
 import Testing
+
 @testable import SequenceBuilder
 
 @Suite
@@ -60,5 +61,86 @@ struct SequenceBuilderTests {
   @Test
   func setEmptyBuilderInit() {
     #expect(Set<Int>(build: {}) == [])
+  }
+}
+
+// MARK: - buildSequence Function Tests
+
+@Suite
+struct BuildSequenceFunctionTests {
+  @Test
+  func basicBuildSequence() {
+    let seq = buildSequence(of: Int.self) {
+      1
+      2
+      3
+    }
+    #expect(Array(seq) == [1, 2, 3])
+  }
+
+  @Test
+  func buildSequenceWithTypeInference() {
+    let seq = buildSequence {
+      "hello"
+      "world"
+    }
+    #expect(Array(seq) == ["hello", "world"])
+  }
+
+  @Test
+  func buildSequenceEmpty() {
+    let seq = buildSequence(of: Int.self) {}
+    #expect(Array(seq).isEmpty)
+  }
+
+  @Test
+  func buildSequenceWithConditional() {
+    let condition = true
+    let seq = buildSequence {
+      1
+      if condition {
+        2
+      }
+      3
+    }
+    #expect(Array(seq) == [1, 2, 3])
+  }
+
+  @Test
+  func buildSequenceWithConditionalFalse() {
+    let condition = false
+    let seq = buildSequence {
+      1
+      if condition {
+        2
+      }
+      3
+    }
+    #expect(Array(seq) == [1, 3])
+  }
+
+  @Test
+  func buildSequenceWithIfElse() {
+    let useFirst = true
+    let seq = buildSequence {
+      if useFirst {
+        1
+        2
+      } else {
+        3
+        4
+      }
+    }
+    #expect(Array(seq) == [1, 2])
+  }
+
+  @Test
+  func buildSequenceWithForLoop() {
+    let seq = buildSequence {
+      for i in 1...3 {
+        i * 10
+      }
+    }
+    #expect(Array(seq) == [10, 20, 30])
   }
 }
