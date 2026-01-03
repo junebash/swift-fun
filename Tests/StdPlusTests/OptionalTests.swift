@@ -34,28 +34,19 @@ public struct OptionalTests {
     @Test
     func orThrowWithNilThrowsUnwrapError() {
       let optional: String? = nil
-      #expect(throws: UnwrapError.self) {
+      #expect(throws: UnwrapError<String>.self) {
         try optional.orThrow()
       }
-    }
-
-    @Test
-    func unwrapErrorContainsCorrectType() throws {
-      let optional: Int? = nil
-      let error = try #require(throws: UnwrapError.self) {
-        try optional.orThrow()
-      }
-      #expect(error.wrappedType is Int.Type)
     }
 
     @Test
     func unwrapErrorContainsCorrectTypeForCustomType() throws {
       struct MyType {}
       let optional: MyType? = nil
-      let error = try #require(throws: UnwrapError.self) {
+      let error = try #require(throws: UnwrapError<MyType>.self) {
         try optional.orThrow()
       }
-      #expect(String(describing: error.wrappedType) == "MyType")
+      #expect(String(describing: error.type) == "MyType")
     }
 
     @Test
@@ -172,6 +163,158 @@ public struct OptionalTests {
         .filter { $0 > 100 }  // This fails
         .filter { $0 % 2 == 0 }
       #expect(result == nil)
+    }
+  }
+
+  // MARK: - TakeOrThrow
+
+  @Suite
+  struct TakeOrThrow {
+    @Test
+    func takeOrThrowWithValueReturnsValueAndSetsToNil() throws {
+      var optional: Int? = 42
+      let result = try optional.takeOrThrow(CustomError.notFound)
+      #expect(result == 42)
+      #expect(optional == nil)
+    }
+
+    @Test
+    func takeOrThrowWithNilThrowsProvidedError() {
+      var optional: Int? = nil
+      #expect(throws: CustomError.self) {
+        try optional.takeOrThrow(CustomError.notFound)
+      }
+    }
+
+    @Test
+    func takeOrThrowWithValueReturnsValueDefaultError() throws {
+      var optional: String? = "hello"
+      let result = try optional.takeOrThrow()
+      #expect(result == "hello")
+      #expect(optional == nil)
+    }
+
+    @Test
+    func takeOrThrowWithNilThrowsUnwrapError() {
+      var optional: String? = nil
+      #expect(throws: UnwrapError<String>.self) {
+        try optional.takeOrThrow()
+      }
+    }
+  }
+
+  // MARK: - Async Map
+
+  @Suite
+  struct AsyncMap {
+    @Test
+    func asyncMapWithValueTransforms() async throws {
+      let optional: Int? = 42
+      let result = await optional.map { value async -> String in
+        "\(value)"
+      }
+      #expect(result == "42")
+    }
+
+    @Test
+    func asyncMapWithNilReturnsNil() async {
+      let optional: Int? = nil
+      let result = await optional.map { value async -> String in
+        "\(value)"
+      }
+      #expect(result == nil)
+    }
+
+    @Test
+    func asyncMapWithThrowingTransformSucceeds() async throws {
+      let optional: Int? = 42
+      let result = try await optional.map { value async throws(CustomError) -> String in
+        "\(value)"
+      }
+      #expect(result == "42")
+    }
+
+    @Test
+    func asyncMapWithThrowingTransformThrows() async {
+      let optional: Int? = 42
+      await #expect(throws: CustomError.self) {
+        try await optional.map { _ async throws(CustomError) -> String in
+          throw CustomError.notFound
+        }
+      }
+    }
+
+    @Test
+    func asyncMapOnNilDoesNotCallTransform() async {
+      var transformCalled = false
+      let optional: Int? = nil
+      _ = await optional.map { value async -> String in
+        transformCalled = true
+        return "\(value)"
+      }
+      #expect(!transformCalled)
+    }
+  }
+
+  // MARK: - Async FlatMap
+
+  @Suite
+  struct AsyncFlatMap {
+    @Test
+    func asyncFlatMapWithValueAndSomeResult() async throws {
+      let optional: Int? = 42
+      let result = await optional.flatMap { value async -> String? in
+        "\(value)"
+      }
+      #expect(result == "42")
+    }
+
+    @Test
+    func asyncFlatMapWithValueAndNilResult() async {
+      let optional: Int? = 42
+      let result = await optional.flatMap { _ async -> String? in
+        nil
+      }
+      #expect(result == nil)
+    }
+
+    @Test
+    func asyncFlatMapWithNilReturnsNil() async {
+      let optional: Int? = nil
+      let result = await optional.flatMap { value async -> String? in
+        "\(value)"
+      }
+      #expect(result == nil)
+    }
+
+    @Test
+    func asyncFlatMapWithThrowingTransformSucceeds() async throws {
+      let optional: Int? = 42
+      let result = try await optional.flatMap { value async throws(CustomError) -> String? in
+        "\(value)"
+      }
+      #expect(result == "42")
+    }
+
+    @Test
+    func asyncFlatMapWithThrowingTransformThrows() async {
+      let optional: Int? = 42
+      await #expect(throws: CustomError.self) {
+        try await optional.flatMap { _ async throws(CustomError) -> String? in
+          throw CustomError.notFound
+        }
+      }
+    }
+
+    @Test
+    func asyncFlatMapOnNilDoesNotCallTransform() async {
+      var transformCalled = false
+      let optional: Int? = nil
+      _ = await optional.flatMap { value async -> String? in
+        transformCalled = true
+        return "\(value)"
+      }
+      #expect(!transformCalled)
     }
   }
 }
