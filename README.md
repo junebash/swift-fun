@@ -19,6 +19,8 @@ Then add the modules you need to your target:
   .product(name: "Either", package: "swift-fun"),
   .product(name: "SequenceBuilder", package: "swift-fun"),
   .product(name: "StdPlus", package: "swift-fun"),
+  .product(name: "Box", package: "swift-fun"),
+  .product(name: "AsyncPlus", package: "swift-fun"),
 ])
 ```
 
@@ -72,13 +74,15 @@ Works with any `RangeReplaceableCollection` or `SetAlgebra` type.
 
 ### StdPlus
 
-Ergonomic extensions to Swift standard library types.
+Ergonomic extensions to Swift standard library types, plus functional utilities.
 
 ```swift
 import StdPlus
 
 // Unwrap or throw
 let user = try users[id].orThrow(UserError.notFound)
+var pending = task
+let value = try pending.takeOrThrow()  // Consumes the optional
 
 // Conditional unwrapping
 let valid = age.filter { $0 >= 0 && $0 <= 150 }
@@ -88,14 +92,76 @@ if let items = results.nonEmpty {
   process(items)
 }
 
+// Single element sequences
+let match = filtered.only  // nil if 0 or 2+ elements
+
+// Numeric utilities
+let bounded = value.clamped(to: 0...100)
+let nonZero = count.nonZero() ?? 1
+let positive = delta.positive()
+
 // Floating-point comparison
 if actual.isNearEqual(to: expected, tolerance: 0.001) { ... }
+
+// Functional helpers
+let result = with(resource) { process($0) }
+let configured = configure(settings) { $0.timeout = 30 }
+if let error = catchAndReturn({ try validate(input) }) {
+  handle(error)
+}
+
+// Async Optional operations
+let user = try await userId.map { await fetchUser($0) }
 
 // Duration to TimeInterval
 let seconds = duration.timeInterval
 ```
 
 Also includes `StatefulAsyncSequence` for async sequences with mutable state.
+
+### Box
+
+Reference wrappers for values, including thread-safe mutable access.
+
+```swift
+import Box
+
+// Immutable reference wrapper
+let boxed = Box(expensiveValue)
+share(boxed)  // Pass by reference
+
+// Thread-safe mutable wrapper
+let counter = MutexBox(0)
+counter.withLock { $0 += 1 }
+
+// Atomic operations
+let old = counter.setValue(100)
+let value = counter.value  // Thread-safe read
+```
+
+`MutexBox` uses Swift 6's `Synchronization.Mutex` for thread-safe access.
+
+### AsyncPlus
+
+Concurrency utilities for safer async code and time manipulation.
+
+```swift
+import AsyncPlus
+
+// Leak-safe continuations
+let result = try await withSaferContinuation { continuation in
+  callback { value in
+    continuation.resume(returning: value)
+  }
+  // If continuation is never resumed, throws LeakedContinuationError
+}
+
+// Time-scaled clocks for testing
+let fastClock = ContinuousClock().scaled(by: 10.0)
+try await fastClock.sleep(for: .seconds(10))  // Actually sleeps ~1 second
+```
+
+`SaferContinuation` automatically resumes with an error if deallocated without being resumed, preventing the common "continuation leaked" runtime warning.
 
 ## Requirements
 

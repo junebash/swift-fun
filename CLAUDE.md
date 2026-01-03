@@ -8,7 +8,9 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 - **Either**: A sum type with `~Copyable` support, typed throws, and functional combinators
 - **SequenceBuilder**: Result builder for declarative sequence construction (similar to SwiftUI's ViewBuilder)
-- **StdPlus**: Ergonomic extensions to Swift standard library types
+- **StdPlus**: Ergonomic extensions to Swift standard library types, plus functional utilities
+- **Box**: Reference wrappers for values, including thread-safe `MutexBox`
+- **AsyncPlus**: Concurrency utilities including leak-safe continuations and time-scaling clocks
 
 Additional modules will likely be added in the future.
 
@@ -25,6 +27,8 @@ swift test
 swift test --filter EitherTests
 swift test --filter SequenceBuilderTests
 swift test --filter StdPlusTests
+swift test --filter BoxTests
+swift test --filter AsyncPlusTests
 ```
 
 ## Architecture
