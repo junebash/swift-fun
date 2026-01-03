@@ -15,31 +15,46 @@ let package = Package(
   products: [],
   targets: []
 )
+.addProduct("Either")
+.addProduct("SequenceBuilder", dependencies: ["Either"])
+.addProduct("StdPlus")
+.addProduct("Box")
+.addProduct("AsyncPlus")
+.addSwiftSettingsToAllTargets([
+  .defaultIsolation(nil),
+  .strictMemorySafety(),
+  .swiftLanguageMode(.v6),
+])
 
-@MainActor
-func addProduct(
-  _ name: String,
-  dependencies: [Target.Dependency] = []
-) {
-  package.products.append(.library(name: name, targets: [name]))
-  package.targets.append(
-    contentsOf: [
-      .target(name: name, dependencies: dependencies),
-      .testTarget(name: name + "Tests", dependencies: [.byName(name: name)])
-    ]
-  )
-}
+// MARK: - Helpers
 
-addProduct("Either")
-addProduct("SequenceBuilder", dependencies: ["Either"])
-addProduct("StdPlus")
+extension Package {
+  @discardableResult
+  func addProduct(
+    _ name: String,
+    dependencies: [Target.Dependency] = []
+  ) -> Self {
+    products.append(.library(name: name, targets: [name]))
+    targets.append(
+      contentsOf: [
+        .target(name: name, dependencies: dependencies),
+        .testTarget(name: name + "Tests", dependencies: [.byName(name: name)])
+      ]
+    )
+    return self
+  }
 
-for target in package.targets {
-  var swiftSettings = target.swiftSettings ?? []
-  swiftSettings.append(contentsOf: [
-    .defaultIsolation(nil),
-    .strictMemorySafety(),
-    .swiftLanguageMode(.v6),
-  ])
-  target.swiftSettings = swiftSettings
+  @discardableResult
+  func addSwiftSettingsToAllTargets(_ settings: [SwiftSetting]) -> Self {
+    for target in targets {
+      var swiftSettings = target.swiftSettings ?? []
+      swiftSettings.append(contentsOf: [
+        .defaultIsolation(nil),
+        .strictMemorySafety(),
+        .swiftLanguageMode(.v6),
+      ])
+      target.swiftSettings = swiftSettings
+    }
+    return self
+  }
 }
