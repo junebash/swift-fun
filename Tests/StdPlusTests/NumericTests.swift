@@ -141,4 +141,98 @@ struct NumericTests {
       #expect(a.isNearEqual(to: b, tolerance: tolerance) == b.isNearEqual(to: a, tolerance: tolerance))
     }
   }
+
+  // MARK: - clamped
+
+  @Suite
+  struct Clamped {
+    @Test
+    func valueWithinRangeUnchanged() {
+      #expect((5.0).clamped(to: 0...10) == 5.0)
+    }
+
+    @Test
+    func valueBelowRangeClampsToLower() {
+      #expect((-5.0).clamped(to: 0...10) == 0.0)
+    }
+
+    @Test
+    func valueAboveRangeClampsToUpper() {
+      #expect((15.0).clamped(to: 0...10) == 10.0)
+    }
+
+    @Test
+    func valueAtLowerBoundUnchanged() {
+      #expect((0.0).clamped(to: 0...10) == 0.0)
+    }
+
+    @Test
+    func valueAtUpperBoundUnchanged() {
+      #expect((10.0).clamped(to: 0...10) == 10.0)
+    }
+
+    @Test
+    func negativeRangeWorks() {
+      #expect((0.0).clamped(to: -10...(-5)) == -5.0)
+    }
+
+    @Test
+    func floatClampedWorks() {
+      let value: Float = 15.0
+      #expect(value.clamped(to: 0...10) == 10.0)
+    }
+  }
+
+  // MARK: - nonZero
+
+  @Suite
+  struct NonZero {
+    @Test
+    func nonZeroValueReturnsSelf() {
+      #expect(5.nonZero() == 5)
+    }
+
+    @Test
+    func zeroReturnsNil() {
+      #expect(0.nonZero() == nil)
+    }
+
+    @Test
+    func negativeValueReturnsSelf() {
+      #expect((-5).nonZero() == -5)
+    }
+
+    @Test
+    func floatingPointNonZeroWorks() {
+      #expect((5.5).nonZero() == 5.5)
+      #expect((0.0).nonZero() == nil)
+    }
+  }
+
+  // MARK: - positive
+
+  @Suite
+  struct Positive {
+    @Test
+    func positiveValueReturnsSelf() {
+      #expect(5.positive() == 5)
+    }
+
+    @Test
+    func zeroReturnsNil() {
+      #expect(0.positive() == nil)
+    }
+
+    @Test
+    func negativeValueReturnsNil() {
+      #expect((-5).positive() == nil)
+    }
+
+    @Test
+    func floatingPointPositiveWorks() {
+      #expect((5.5).positive() == 5.5)
+      #expect((0.0).positive() == nil)
+      #expect((-5.5).positive() == nil)
+    }
+  }
 }
