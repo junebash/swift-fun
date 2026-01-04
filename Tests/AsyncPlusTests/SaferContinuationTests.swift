@@ -67,4 +67,111 @@ struct SaferContinuationTests {
     }
     #expect(result == "hello")
   }
+
+  @Test
+  func firstResumeReturnsNil() async throws {
+    var resumeResult: Result<Int, any Error>?
+    let result = try await withSaferContinuation { continuation in
+      resumeResult = continuation.resume(returning: 42)
+    }
+    #expect(result == 42)
+    #expect(resumeResult == nil)
+  }
+
+  @Test
+  func secondResumeReturnsFirstResult() async throws {
+    var firstResumeResult: Result<Int, any Error>?
+    var secondResumeResult: Result<Int, any Error>?
+
+    let result = try await withSaferContinuation { continuation in
+      firstResumeResult = continuation.resume(returning: 42)
+      secondResumeResult = continuation.resume(returning: 99)
+    }
+
+    #expect(result == 42)
+    #expect(firstResumeResult == nil)
+
+    // Second resume should return the first result
+    guard let secondResult = secondResumeResult else {
+      Issue.record("Expected second resume to return a result")
+      return
+    }
+
+    switch secondResult {
+    case .success(let value):
+      #expect(value == 42)
+    case .failure:
+      Issue.record("Expected success, got failure")
+    }
+  }
+
+  @Test
+  func secondResumeWithErrorReturnsFirstSuccessResult() async throws {
+    var firstResumeResult: Result<Int, any Error>?
+    var secondResumeResult: Result<Int, any Error>?
+
+    let result = try await withSaferContinuation { continuation in
+      firstResumeResult = continuation.resume(returning: 42)
+      secondResumeResult = continuation.resume(throwing: TestError.failed)
+    }
+
+    #expect(result == 42)
+    #expect(firstResumeResult == nil)
+
+    // Second resume should return the first result (success)
+    guard let secondResult = secondResumeResult else {
+      Issue.record("Expected second resume to return a result")
+      return
+    }
+
+    switch secondResult {
+    case .success(let value):
+      #expect(value == 42)
+    case .failure:
+      Issue.record("Expected success, got failure")
+    }
+  }
+
+  @Test
+  func secondResumeWithSuccessReturnsFirstErrorResult() async {
+    var firstResumeResult: Result<Int, any Error>?
+    var secondResumeResult: Result<Int, any Error>?
+
+    await #expect(throws: TestError.self) {
+      try await withSaferContinuation(of: Int.self) { continuation in
+        firstResumeResult = continuation.resume(throwing: TestError.failed)
+        secondResumeResult = continuation.resume(returning: 42)
+      }
+    }
+
+    #expect(firstResumeResult == nil)
+
+    // Second resume should return the first result (error)
+    guard let secondResult = secondResumeResult else {
+      Issue.record("Expected second resume to return a result")
+      return
+    }
+
+    switch secondResult {
+    case .success:
+      Issue.record("Expected failure, got success")
+    case .failure(let error):
+      #expect(error is TestError)
+    }
+  }
+
+  @Test
+  func canDetectAlreadyResumedContinuation() async throws {
+    var wasAlreadyResumed = false
+
+    let result = try await withSaferContinuation { continuation in
+      continuation.resume(returning: 42)
+      if continuation.resume(returning: 99) != nil {
+        wasAlreadyResumed = true
+      }
+    }
+
+    #expect(result == 42)
+    #expect(wasAlreadyResumed)
+  }
 }

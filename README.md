@@ -156,12 +156,22 @@ let result = try await withSaferContinuation { continuation in
   // If continuation is never resumed, throws LeakedContinuationError
 }
 
+// Detect if continuation was already resumed
+let result = try await withSaferContinuation { continuation in
+  continuation.resume(returning: 42)
+
+  // Second resume returns the previous result instead of nil
+  if let previousResult = continuation.resume(returning: 99) {
+    print("Warning: continuation was already resumed with \(previousResult)")
+  }
+}
+
 // Time-scaled clocks for testing
 let fastClock = ContinuousClock().scaled(by: 10.0)
 try await fastClock.sleep(for: .seconds(10))  // Actually sleeps ~1 second
 ```
 
-`SaferContinuation` automatically resumes with an error if deallocated without being resumed, preventing the common "continuation leaked" runtime warning.
+`SaferContinuation` automatically resumes with an error if deallocated without being resumed, preventing the common "continuation leaked" runtime warning. The `resume` methods return `nil` on first call and the previous result on subsequent calls, allowing you to detect and handle double-resume scenarios.
 
 ## Requirements
 
