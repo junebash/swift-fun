@@ -40,13 +40,20 @@ jobs:
           echo "Release notes for $TAG:"
           cat release_notes.md
 
-      - name: Create GitHub Release
+      - name: Create or Update GitHub Release
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           TAG="${GITHUB_REF#refs/tags/}"
 
-          gh release create "$TAG" \
-            --title "$TAG" \
-            --notes-file release_notes.md \
-            --latest
+          # Check if release already exists
+          if gh release view "$TAG" &>/dev/null; then
+            echo "Release $TAG exists, updating notes..."
+            gh release edit "$TAG" --notes-file release_notes.md
+          else
+            echo "Creating release $TAG..."
+            gh release create "$TAG" \
+              --title "$TAG" \
+              --notes-file release_notes.md \
+              --latest
+          fi
