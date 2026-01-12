@@ -141,6 +141,15 @@ PROMPT_EOF
 
 PROMPT_EOF
     cat "$RAW_CHANGELOG" >> "$PROMPT_FILE"
+
+    # Add full commit details so Claude can see commit bodies
+    cat >> "$PROMPT_FILE" << 'PROMPT_EOF'
+
+## Full Commit Details:
+
+PROMPT_EOF
+    git log "${LATEST_TAG}..HEAD" --format="### %s%n%n%b" >> "$PROMPT_FILE"
+
     cat >> "$PROMPT_FILE" << 'PROMPT_EOF'
 
 ## Instructions:
