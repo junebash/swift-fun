@@ -209,14 +209,29 @@ echo "----------------------------------------"
 cat "$ENHANCED_CHANGELOG"
 echo "----------------------------------------"
 
-# Prompt for confirmation
-echo ""
-read -p "Proceed with release $NEXT_VERSION? [y/N] " -n 1 -r
-echo
-if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    echo "Release cancelled."
-    exit 0
-fi
+# Prompt for confirmation with edit option
+while true; do
+    echo ""
+    read -p "Proceed with release $NEXT_VERSION? [y/e/N] (e=edit) " -n 1 -r
+    echo
+    case $REPLY in
+        [Yy])
+            break
+            ;;
+        [Ee])
+            ${EDITOR:-vim} "$ENHANCED_CHANGELOG"
+            echo ""
+            echo "Updated changelog:"
+            echo "----------------------------------------"
+            cat "$ENHANCED_CHANGELOG"
+            echo "----------------------------------------"
+            ;;
+        *)
+            echo "Release cancelled."
+            exit 0
+            ;;
+    esac
+done
 
 # Update RELEASES.md
 echo ""
