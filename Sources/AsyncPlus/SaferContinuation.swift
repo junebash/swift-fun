@@ -97,6 +97,13 @@ public final class SaferContinuation<Success: Sendable>: Sendable {
     resume(with: .success(value))
   }
 
+  @inlinable
+  @discardableResult
+  public consuming func resume() -> sending Result<Void, any Error>?
+  where Success == Void {
+    resume(returning: ())
+  }
+
   /// Resumes the continuation with an error.
   ///
   /// This method can only be called once. Subsequent calls are ignored but return

@@ -4,36 +4,36 @@ import Testing
 @Suite
 struct BoxTests {
 
-  // MARK: - Box
+  // MARK: - Shared
 
   @Suite
-  struct BoxType {
+  struct SharedTests {
     @Test
-    func boxStoresValue() {
-      let box = Box(42)
-      #expect(box.value == 42)
+    func sharedStoresValue() {
+      let shared = Shared(42)
+      #expect(shared.value == 42)
     }
 
     @Test
-    func boxWorksWithStrings() {
-      let box = Box("hello")
-      #expect(box.value == "hello")
+    func sharedWorksWithStrings() {
+      let shared = Shared("hello")
+      #expect(shared.value == "hello")
     }
 
     @Test
-    func boxIsReferenceType() {
-      let box1 = Box(42)
-      let box2 = box1
-      #expect(box1 === box2)
+    func sharedIsReferenceType() {
+      let shared1 = Shared(42)
+      let shared2 = shared1
+      #expect(shared1 === shared2)
     }
 
     @Test
-    func boxWorksWithStructs() {
+    func sharedWorksWithStructs() {
       struct TestStruct: Equatable {
         var value: Int
       }
-      let box = Box(TestStruct(value: 42))
-      #expect(box.value == TestStruct(value: 42))
+      let shared = Shared(TestStruct(value: 42))
+      #expect(shared.value == TestStruct(value: 42))
     }
   }
 

@@ -1,30 +1,5 @@
 import Synchronization
 
-/// An immutable reference wrapper for a value.
-///
-/// `Box` provides reference semantics for any value, including non-copyable types.
-/// This is useful when you need to share a value without copying, or when you need
-/// to store a non-copyable value in a context that requires a reference type.
-///
-/// ```swift
-/// let boxedValue = Box(expensiveComputation())
-/// // boxedValue can be passed around by reference
-/// print(boxedValue.value)
-/// ```
-public final class Box<Value: ~Copyable> {
-  /// The wrapped value.
-  public let value: Value
-
-  /// Creates a box containing the specified value.
-  ///
-  /// - Parameter value: The value to wrap.
-  public init(_ value: consuming Value) {
-    self.value = value
-  }
-}
-
-extension Box: Sendable where Value: Sendable {}
-
 /// A thread-safe mutable reference wrapper for a value.
 ///
 /// `MutexBox` provides synchronized access to a mutable value using Swift's `Mutex`.
