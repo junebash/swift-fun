@@ -97,6 +97,11 @@ public final class SaferContinuation<Success: Sendable>: Sendable {
     resume(with: .success(value))
   }
 
+  /// Resumes a void continuation, signaling successful completion.
+  ///
+  /// A convenience for `resume(returning: ())` when the continuation carries
+  /// no meaningful value. Common when bridging completion handlers that only
+  /// signal success or failure.
   @inlinable
   @discardableResult
   public consuming func resume() -> sending Result<Void, any Error>?
