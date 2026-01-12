@@ -1,5 +1,40 @@
 # swift-fun Releases
 
+## v0.3.0
+
+### Box Module
+
+**Renamed Types:**
+
+- `Box` → `Shared`
+
+**New Types:**
+
+- `OwnedPointer`: Unique ownership semantics with proper documentation
+
+**Fixes:**
+
+- `Shared` now correctly conforms to `Sendable` for `~Copyable` types
+
+### AsyncPlus Additions
+
+- `resume()` convenience method for `Void` continuations on `SaferContinuation`
+
+### Tooling & Infrastructure
+
+**Release Automation:**
+
+- New release script (`./scripts/release.sh`) with Claude Code integration for changelog enhancement
+- git-cliff configuration for conventional commit parsing
+
+**Documentation:**
+
+- Commit convention guidelines in `.github/COMMIT_CONVENTION.md`
+- Git workflow and release instructions in CLAUDE.md
+- Full release documentation in RELEASING.md
+
+---
+
 ## v0.2.0
 
 ### New Modules
