@@ -1,5 +1,14 @@
 # swift-fun Releases
 
+## v0.3.2
+
+### Tooling & Infrastructure
+
+- Added [just](https://github.com/casey/just) command runner for ergonomic build and test workflows
+- Documented just commands in CLAUDE.md and README.md
+
+---
+
 ## v0.3.1
 
 ### Bug Fixes
