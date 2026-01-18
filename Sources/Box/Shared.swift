@@ -1,5 +1,3 @@
-import Synchronization
-
 /// An immutable reference wrapper for a value.
 ///
 /// `Shared` provides reference semantics for any value, including non-copyable types.
