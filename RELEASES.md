@@ -1,5 +1,17 @@
 # swift-fun Releases
 
+## v0.3.1
+
+### Bug Fixes
+
+- **CI**: Release workflow now updates existing releases instead of failing when a tag already exists
+
+### Maintenance
+
+- Removed unused `Synchronization` import
+
+---
+
 ## v0.3.0
 
 ### Box Module
