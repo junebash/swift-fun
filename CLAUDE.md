@@ -16,20 +16,33 @@ Additional modules will likely be added in the future.
 
 ## Building and Testing
 
+This project uses [just](https://github.com/casey/just) as a command runner. Run `just` to see available commands.
+
 ```bash
-# Build the package
-swift build
+# Build
+just build           # Debug build
+just build-release   # Release build
 
-# Run all tests
-swift test
+# Test
+just test            # Run all tests
+just test-only Box   # Run tests for a specific module
+just test-async      # AsyncPlus tests
+just test-box        # Box tests
+just test-either     # Either tests
+just test-sequence   # SequenceBuilder tests
+just test-std        # StdPlus tests
 
-# Run tests for a specific module
-swift test --filter EitherTests
-swift test --filter SequenceBuilderTests
-swift test --filter StdPlusTests
-swift test --filter BoxTests
-swift test --filter AsyncPlusTests
+# Maintenance
+just clean           # Clean build artifacts
+
+# Releases
+just release         # Create release (dry run by default)
+just release-dry     # Explicit dry run
+just release-push    # Create and push release
+just release-version 1.0.0  # Release with specific version
 ```
+
+You can also use `swift build` and `swift test` directly if preferred.
 
 ## Architecture
 
@@ -105,7 +118,7 @@ See [.github/COMMIT_CONVENTION.md](.github/COMMIT_CONVENTION.md) for full guidel
 
 ## Releasing
 
-Run `./scripts/release.sh` to create releases. The script:
+Run `just release` (or `./scripts/release.sh`) to create releases. The script:
 
 1. Detects next version from commit types (`feat` → minor, `fix` → patch, `!` → major)
 2. Generates changelog with git-cliff

@@ -173,6 +173,20 @@ try await fastClock.sleep(for: .seconds(10))  // Actually sleeps ~1 second
 
 `SaferContinuation` automatically resumes with an error if deallocated without being resumed, preventing the common "continuation leaked" runtime warning. The `resume` methods return `nil` on first call and the previous result on subsequent calls, allowing you to detect and handle double-resume scenarios.
 
+## Development
+
+This project uses [just](https://github.com/casey/just) as a command runner. Run `just` to see available commands.
+
+```bash
+just build           # Debug build
+just build-release   # Release build
+just test            # Run all tests
+just test-only Box   # Run tests for a specific module
+just clean           # Clean build artifacts
+```
+
+You can also use `swift build` and `swift test` directly.
+
 ## Requirements
 
 - Swift 6.0+
