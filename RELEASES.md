@@ -1,5 +1,16 @@
 # swift-fun Releases
 
+## v0.3.3
+
+
+
+### Bug Fixes
+
+
+- remove strictMemorySafety and defaultIsolation settings
+
+---
+
 ## v0.3.2
 
 ### Tooling & Infrastructure
