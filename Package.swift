@@ -21,8 +21,6 @@ let package = Package(
 .addProduct("Box")
 .addProduct("AsyncPlus")
 .addSwiftSettingsToAllTargets([
-  .defaultIsolation(nil),
-  .strictMemorySafety(),
   .swiftLanguageMode(.v6),
 ])
 
@@ -49,8 +47,6 @@ extension Package {
     for target in targets {
       var swiftSettings = target.swiftSettings ?? []
       swiftSettings.append(contentsOf: [
-        .defaultIsolation(nil),
-        .strictMemorySafety(),
         .swiftLanguageMode(.v6),
       ])
       target.swiftSettings = swiftSettings
