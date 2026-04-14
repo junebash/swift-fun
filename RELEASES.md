@@ -1,5 +1,13 @@
 # swift-fun Releases
 
+## v0.3.4
+
+### Bug Fixes
+
+- **StdPlus**: Fixed `Duration.timeInterval` precision — split computation via `.components` so integer-second inputs like `.seconds(30)` round-trip exactly through `Double` instead of losing precision through `Int128` → `Double` conversion
+
+---
+
 ## v0.3.3
 
 
