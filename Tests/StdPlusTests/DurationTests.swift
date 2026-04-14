@@ -74,5 +74,15 @@ struct DurationTests {
       let duration = Duration.milliseconds(1)
       #expect(duration.timeInterval.isNearEqual(to: 0.001, tolerance: 0.000001))
     }
+
+    @Test
+    func timeIntervalExactForIntegerSeconds() {
+      #expect(Duration.seconds(30).timeInterval == 30.0)
+    }
+
+    @Test
+    func timeIntervalExactForHalfSecondFraction() {
+      #expect(Duration.milliseconds(1500).timeInterval == 1.5)
+    }
   }
 }

@@ -9,7 +9,11 @@ extension Duration {
   ///
   /// - Note: Very large or precise durations may lose precision when converted to `Double`.
   public var timeInterval: Double {
-    get { Double(attoseconds) * 0.000_000_000__000_000_001 }
+    // Split into (seconds, attoseconds) so Int64 seconds round-trip exactly through Double; going through Int128(attoseconds) truncates above ~2^53.
+    get {
+      let (sec, atto) = components
+      return Double(sec) + Double(atto) * 1e-18
+    }
     set { self = .seconds(newValue) }
   }
 }
